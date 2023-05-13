@@ -9,24 +9,30 @@
 
 void loginMenu()
 {
+    printf("-----------------------------------\n");
+    printf("Hello and welcome to OS Market!\n");
     printf("What would you like to login as?\n");
     printf("1. Admin\n");
     printf("2. User\n");
     printf("3. Exit\n");
+    printf("-----------------------------------\n");
 }
 
 void adminMenu()
 {
+    printf("-----------------------------------\n");
     printf("What would you like to do?\n");
     printf("1. Add Product\n");
     printf("2. Delete Product\n");
     printf("3. Update Product\n");
     printf("4. Display Products\n");
     printf("5. Log out\n");
+    printf("-----------------------------------\n");
 }
 
 void userMenu()
 {
+    printf("-----------------------------------\n");
     printf("What would you like to do?\n");
     printf("1. View Available Products\n");
     printf("2. Add item to Cart\n");
@@ -34,6 +40,7 @@ void userMenu()
     printf("4. View Cart\n");
     printf("5. Payment\n");
     printf("6. Log out\n");
+    printf("-----------------------------------\n");
 }
 
 void displayProducts(struct Product pdt)
@@ -42,6 +49,7 @@ void displayProducts(struct Product pdt)
     printf("Product name : %s\t", pdt.prod_name);
     printf("Quantity : %d\t", pdt.qty);
     printf("Price : %d\n", pdt.price);
+    printf("----------------------------------------------------------------------\n");
 }
 
 void displayReceipt(struct Receipt rcpt)
@@ -52,6 +60,7 @@ void displayReceipt(struct Receipt rcpt)
     printf("Price : %d\t", rcpt.price);
     printf("Payment Status : %s\t", rcpt.payment_status);
     printf("Comment : %s\n", rcpt.msg);
+    printf("---------------------------------------------------------------------------------------------------------\n");
 }
 
 int main()
@@ -114,8 +123,9 @@ int main()
                     // printf("Hello");
                     char msg[100];
                     int rt = read(sockfd, msg, sizeof(msg));
+                    printf("-----------------------------------\n");
                     write(1, &msg, rt);
-                    printf("\n");
+                    // printf("\n");
                 }
                 else if (choice == 2)
                 {
@@ -125,8 +135,9 @@ int main()
                     write(sockfd, &pid, sizeof(int));
                     char msg[100];
                     int rt = read(sockfd, msg, sizeof(msg));
+                    printf("-----------------------------------\n");
                     write(1, &msg, rt);
-                    printf("\n");
+                    // printf("\n");
                 }
                 else if (choice == 3)
                 {
@@ -142,8 +153,9 @@ int main()
                     write(sockfd, &price, sizeof(int));
                     char msg[100];
                     int rt = read(sockfd, msg, sizeof(msg));
+                    printf("----------------------------------------------------------------------\n");
                     write(1, &msg, rt);
-                    printf("\n");
+                    // printf("\n");
                 }
                 else if (choice == 4)
                 {
@@ -153,6 +165,7 @@ int main()
                         read(sockfd, &item, sizeof(struct Product));
                         if (item.prod_id != -1)
                         {
+                            printf("----------------------------------------------------------------------\n");
                             displayProducts(item);
                         }
                         else
@@ -168,7 +181,7 @@ int main()
                 }
                 else
                 {
-                    printf("Enter valid input!\n");
+                    printf("Enter valid input!!!\n");
                 }
             }
         }
@@ -189,6 +202,7 @@ int main()
                         read(sockfd, &item, sizeof(struct Product));
                         if (item.prod_id != -1)
                         {
+                            printf("----------------------------------------------------------------------\n");
                             displayProducts(item);
                         }
                         else
@@ -218,6 +232,7 @@ int main()
                     write(sockfd, &qty, sizeof(int));
                     char msg[100];
                     int rt = read(sockfd, msg, sizeof(msg));
+                    printf("-----------------------------------\n");
                     write(1, &msg, rt);
                     printf("\n");
                 }
@@ -260,8 +275,9 @@ int main()
                         }
                         char msg[100];
                         int rt = read(sockfd, msg, sizeof(msg));
+                        printf("-----------------------------------\n");
                         write(1, &msg, rt);
-                        printf("\n");
+                        // printf("\n");
                     }
                 }
                 else if (choice == 4)
@@ -284,6 +300,8 @@ int main()
                             read(sockfd, &item, sizeof(struct Product));
                             if (item.prod_id != -1)
                             {
+                                printf("Your cart items are as follows: ");
+                                printf("----------------------------------------------------------------------\n");
                                 displayProducts(item);
                             }
                             else
@@ -318,6 +336,7 @@ int main()
                             read(sockfd, &rcpt, sizeof(struct Receipt));
                             if (rcpt.prod_id != -1)
                             {
+                                printf("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
                                 displayReceipt(rcpt);
                             }
                             else
@@ -344,6 +363,7 @@ int main()
                             read(sockfd, &rcpt, sizeof(struct Receipt));
                             if (rcpt.prod_id != -1)
                             {
+                                printf("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
                                 displayReceipt(rcpt);
                             }
                             else
@@ -352,6 +372,7 @@ int main()
                             }
                         }
                         printf("Thanks for shopping with us!\n");
+                        printf("-----------------------------------\n");
                         printf("\n");
                     }
                     else
@@ -359,6 +380,7 @@ int main()
                         int ans = 0;
                         write(sockfd, &ans, sizeof(int));
                         printf("No worries!\n");
+                        printf("-----------------------------------\n");
                     }
                 }
                 else if (choice == 6)
@@ -367,7 +389,7 @@ int main()
                 }
                 else
                 {
-                    printf("Enter valid input!\n");
+                    printf("Enter valid input!!!\n");
                 }
             }
         }
@@ -377,7 +399,7 @@ int main()
         }
         else
         {
-            printf("Enter valid input!\n");
+            printf("Enter valid input!!!\n");
         }
     }
 

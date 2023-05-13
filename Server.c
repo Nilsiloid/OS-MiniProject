@@ -351,7 +351,7 @@ int totalCalc(int CustomerID, int client_fd)
                             rcpt.qty = cart.cart_items[i].qty;
                             rcpt.cost = cart.cart_items[i].price * cart.cart_items[i].qty;
                             strcpy(rcpt.prod_name, cart.cart_items[i].prod_name);
-                            strcpy(rcpt.msg, "Quantity is same as available.");
+                            strcpy(rcpt.msg, "Quantity is same as required.");
                             strcpy(rcpt.payment_status, "Awaiting Payment.");
 
                             write(rcpt_fd, &rcpt, sizeof(struct Receipt));

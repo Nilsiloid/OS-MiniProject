@@ -28,3 +28,30 @@ There are 3 other files used in the implementation -
 2. Cart - this file stores the products in a customer's cart along with the customerID. It stores each cart as a structure containing the following - customerID, array of 50 Product structures.
 3. Receipt - this file stores a customer's cart(and their customerID) with the quantity as per availability. If the available quantity is less than that mentioned in the cart, then the quantity mentioned in receipt is reduced to fit the need.
 The Receipt file also stores the payment status and a message regarding the quantity of products.
+
+# How to run the Project?
+1. Open a new terminal and type the following:
+```bash
+gcc Server.c -o Server
+```
+This will create an executable file called Server that we can then run to execute the Server side.
+
+```bash
+./Server
+```
+This will run the created executable - Server.
+
+2. Open another separate new terminal and use the following command:
+```bash
+gcc User.c -o User
+```
+This will create an executable file called User that we can then run to execute the Use side.
+
+```bash
+./Server
+```
+This will run the created executable - User. This will then connect to the socket on server side and we can then start using the functionalities provided for the E-commerce system.
+
+Once we run the ./User command, we will get prompts on the terminal running the User executable and thus, we have successfully run the code.
+
+For more details on the Project, kindly refer to the [Report](https://github.com/Nilsiloid/OS-MiniProject/blob/master/Report.pdf)

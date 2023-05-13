@@ -48,7 +48,7 @@ gcc User.c -o User
 This will create an executable file called User that we can then run to execute the Use side.
 
 ```bash
-./Server
+./User
 ```
 This will run the created executable - User. This will then connect to the socket on server side and we can then start using the functionalities provided for the E-commerce system.
 

@@ -65,6 +65,7 @@ void displayReceipt(struct Receipt rcpt)
 
 int main()
 {
+    printf("Establishing connection to server\n");
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sockfd == -1)
@@ -103,16 +104,37 @@ int main()
                 write(sockfd, &choice, sizeof(int));
                 if (choice == 1)
                 {
-                    int pid, price, qty;
+                    int pid = 0, price = 0, qty = 0;
                     char pname[50];
-                    printf("Enter product id: ");
-                    scanf("%d", &pid);
+                    while (pid < 1)
+                    {
+                        printf("Enter product ID: ");
+                        scanf("%d", &pid);
+                        if (pid < 1)
+                        {
+                            printf("Enter valid product ID!\n");
+                        }
+                    }
                     printf("Enter product name: ");
                     scanf("%s", pname);
-                    printf("Enter price: ");
-                    scanf("%d", &price);
-                    printf("Enter quantity: ");
-                    scanf("%d", &qty);
+                    while (price < 1)
+                    {
+                        printf("Enter price: ");
+                        scanf("%d", &price);
+                        if (price < 1)
+                        {
+                            printf("Enter valid price!\n");
+                        }
+                    }
+                    while (qty < 1)
+                    {
+                        printf("Enter quantity: ");
+                        scanf("%d", &qty);
+                        if (qty < 1)
+                        {
+                            printf("Enter valid quantity!\n");
+                        }
+                    }
                     write(sockfd, &pid, sizeof(int));
                     // printf("Hello");
                     write(sockfd, pname, sizeof(pname));
@@ -129,9 +151,16 @@ int main()
                 }
                 else if (choice == 2)
                 {
-                    int pid;
-                    printf("Enter product id: ");
-                    scanf("%d", &pid);
+                    int pid = 0;
+                    while (pid < 1)
+                    {
+                        printf("Enter product ID: ");
+                        scanf("%d", &pid);
+                        if (pid < 1)
+                        {
+                            printf("Enter valid product ID!\n");
+                        }
+                    }
                     write(sockfd, &pid, sizeof(int));
                     char msg[100];
                     int rt = read(sockfd, msg, sizeof(msg));
@@ -141,13 +170,34 @@ int main()
                 }
                 else if (choice == 3)
                 {
-                    int pid, price, qty;
-                    printf("Enter product id: ");
-                    scanf("%d", &pid);
-                    printf("Enter price: ");
-                    scanf("%d", &price);
-                    printf("Enter quantity: ");
-                    scanf("%d", &qty);
+                    int pid = 0, price = 0, qty = 0;
+                    while (pid < 1)
+                    {
+                        printf("Enter product ID: ");
+                        scanf("%d", &pid);
+                        if (pid < 1)
+                        {
+                            printf("Enter valid product ID!\n");
+                        }
+                    }
+                    while (price < 1)
+                    {
+                        printf("Enter price: ");
+                        scanf("%d", &price);
+                        if (price < 1)
+                        {
+                            printf("Enter valid price!\n");
+                        }
+                    }
+                    while (qty < 1)
+                    {
+                        printf("Enter quantity: ");
+                        scanf("%d", &qty);
+                        if (qty < 1)
+                        {
+                            printf("Enter valid quantity!\n");
+                        }
+                    }
                     write(sockfd, &pid, sizeof(int));
                     write(sockfd, &qty, sizeof(int));
                     write(sockfd, &price, sizeof(int));
@@ -214,20 +264,42 @@ int main()
                 }
                 else if (choice == 2)
                 {
-                    int cust_id;
-                    printf("Enter your ID(if you haven't been assigned, enter 0): ");
-                    scanf("%d", &cust_id);
+                    int cust_id = -1;
+                    while (cust_id < 0)
+                    {
+                        printf("Enter your ID(if you haven't been assigned, enter 0): ");
+                        scanf("%d", &cust_id);
+                        if (cust_id < 0)
+                        {
+                            printf("Enter valid customer ID!\n");
+                        }
+                    }
                     write(sockfd, &cust_id, sizeof(int));
                     if (cust_id == 0)
                     {
                         read(sockfd, &cust_id, sizeof(int));
                         printf("Your ID is: %d\n", cust_id);
                     }
-                    int pid, qty;
-                    printf("Enter ID of product you want to add to cart: ");
-                    scanf("%d", &pid);
-                    printf("Enter qty that you want to add to cart: ");
-                    scanf("%d", &qty);
+                    int pid = 0, qty = 0;
+                    while (pid < 1)
+                    {
+                        printf("Enter ID of product you want to add to cart: ");
+                        scanf("%d", &pid);
+                        if (pid < 1)
+                        {
+                            printf("Enter valid product ID!\n");
+                        }
+                    }
+                    while (qty < 1)
+                    {
+                        printf("Enter qty that you want to add to cart: ");
+                        scanf("%d", &qty);
+                        if (qty < 1)
+                        {
+                            printf("Enter valid quantity!\n");
+                        }
+                    }
+
                     write(sockfd, &pid, sizeof(int));
                     write(sockfd, &qty, sizeof(int));
                     char msg[100];
@@ -238,9 +310,16 @@ int main()
                 }
                 else if (choice == 3)
                 {
-                    int cust_id;
-                    printf("Enter your ID(if you haven't been assigned, enter 0): ");
-                    scanf("%d", &cust_id);
+                    int cust_id = -1;
+                    while (cust_id < 0)
+                    {
+                        printf("Enter your ID(if you haven't been assigned, enter 0): ");
+                        scanf("%d", &cust_id);
+                        if (cust_id < 0)
+                        {
+                            printf("Enter valid customer ID!\n");
+                        }
+                    }
                     if (cust_id == 0)
                     {
                         printf("You need to have items in your cart to update it!");
@@ -257,20 +336,43 @@ int main()
                         write(sockfd, &ch, sizeof(int));
                         if (ch == 1)
                         {
-                            int pid, qty;
-                            printf("Enter ID of product you want to update in cart: ");
-                            scanf("%d", &pid);
-                            printf("Enter qty that you want to update to: ");
-                            scanf("%d", &qty);
+                            int pid = 0, qty = 0;
+                            while (pid < 1)
+                            {
+                                printf("Enter ID of product you want to update in cart: ");
+                                scanf("%d", &pid);
+                                if (pid < 1)
+                                {
+                                    printf("Enter valid product ID!\n");
+                                }
+                            }
+                            while (qty < 1)
+                            {
+                                printf("Enter qty that you want to update to: ");
+                                scanf("%d", &qty);
+                                if (qty < 1)
+                                {
+                                    printf("Enter valid quantity!\n");
+                                }
+                            }
+
                             write(sockfd, &pid, sizeof(int));
                             write(sockfd, &qty, sizeof(int));
                             // printf("Inside\n");
                         }
                         else if (ch == 2)
                         {
-                            int pid;
-                            printf("Enter ID of product you want to delete from cart: ");
-                            scanf("%d", &pid);
+                            int pid = 0;
+                            while (pid < 1)
+                            {
+                                printf("Enter ID of product you want to delete from cart: ");
+                                scanf("%d", &pid);
+                                if (pid < 1)
+                                {
+                                    printf("Enter valid product ID!\n");
+                                }
+                            }
+
                             write(sockfd, &pid, sizeof(int));
                         }
                         char msg[100];
@@ -282,9 +384,16 @@ int main()
                 }
                 else if (choice == 4)
                 {
-                    int cust_id;
-                    printf("Enter your ID(if you haven't been assigned, enter 0): ");
-                    scanf("%d", &cust_id);
+                    int cust_id = -1;
+                    while (cust_id < 0)
+                    {
+                        printf("Enter your ID(if you haven't been assigned, enter 0): ");
+                        scanf("%d", &cust_id);
+                        if (cust_id < 0)
+                        {
+                            printf("Enter valid customer ID!\n");
+                        }
+                    }
                     if (cust_id == 0)
                     {
                         printf("Your cart is empty!\n");
@@ -315,10 +424,17 @@ int main()
                 }
                 else if (choice == 5)
                 {
-                    int cust_id;
                     int total_amt = 0;
-                    printf("Enter your ID(if you haven't been assigned, enter 0): ");
-                    scanf("%d", &cust_id);
+                    int cust_id = -1;
+                    while (cust_id < 0)
+                    {
+                        printf("Enter your ID(if you haven't been assigned, enter 0): ");
+                        scanf("%d", &cust_id);
+                        if (cust_id < 0)
+                        {
+                            printf("Enter valid customer ID!\n");
+                        }
+                    }
                     if (cust_id == 0)
                     {
                         printf("Your cart is empty!\n");
@@ -349,38 +465,47 @@ int main()
                         printf("\n");
                     }
 
-                    printf("Enter yes/no to confirm your payment: ");
-                    char answer[10];
-                    scanf("%s", answer);
+                    while (1)
+                    {
+                        printf("Enter yes/no to confirm your payment: ");
+                        char answer[10];
+                        scanf("%s", answer);
 
-                    if (strcmp(answer, "yes") == 0)
-                    {
-                        int ans = 1;
-                        write(sockfd, &ans, sizeof(int));
-                        struct Receipt rcpt;
-                        while (1)
+                        if (strcmp(answer, "yes") == 0)
                         {
-                            read(sockfd, &rcpt, sizeof(struct Receipt));
-                            if (rcpt.prod_id != -1)
+                            int ans = 1;
+                            write(sockfd, &ans, sizeof(int));
+                            struct Receipt rcpt;
+                            while (1)
                             {
-                                printf("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-                                displayReceipt(rcpt);
+                                read(sockfd, &rcpt, sizeof(struct Receipt));
+                                if (rcpt.prod_id != -1)
+                                {
+                                    printf("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+                                    displayReceipt(rcpt);
+                                }
+                                else
+                                {
+                                    break;
+                                }
                             }
-                            else
-                            {
-                                break;
-                            }
+                            printf("Thanks for shopping with us!\n");
+                            printf("-----------------------------------\n");
+                            printf("\n");
+                            break;
                         }
-                        printf("Thanks for shopping with us!\n");
-                        printf("-----------------------------------\n");
-                        printf("\n");
-                    }
-                    else
-                    {
-                        int ans = 0;
-                        write(sockfd, &ans, sizeof(int));
-                        printf("No worries!\n");
-                        printf("-----------------------------------\n");
+                        else if (strcmp(answer, "no") == 0)
+                        {
+                            int ans = 0;
+                            write(sockfd, &ans, sizeof(int));
+                            printf("No worries!\n");
+                            printf("-----------------------------------\n");
+                            break;
+                        }
+                        else
+                        {
+                            printf("Enter valid input!\n");
+                        }
                     }
                 }
                 else if (choice == 6)

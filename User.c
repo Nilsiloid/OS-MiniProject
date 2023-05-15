@@ -404,12 +404,12 @@ int main()
                     {
                         write(sockfd, &cust_id, sizeof(int));
                         struct Product item;
+                        printf("Your cart items are as follows: \n");
                         while (1)
                         {
                             read(sockfd, &item, sizeof(struct Product));
                             if (item.prod_id != -1)
                             {
-                                printf("Your cart items are as follows: ");
                                 printf("----------------------------------------------------------------------\n");
                                 displayProducts(item);
                             }

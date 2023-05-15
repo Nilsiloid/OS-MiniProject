@@ -319,10 +319,10 @@ void EditCart(int customerID, int productID, int qty, int update, int delete, in
         else if (productID == data.prod_id && qty > data.qty)
         {
             // have to add socket send to tell user about not being able to add product due to less qty.
-            write(client_fd, "The product has not been added/updated/deleted due to less quantity!\n", sizeof("The product has not been added due to less quantity!\n"));
+            write(client_fd, "The product has not been added/updated/deleted due to less quantity!\n", 70);
         }
     }
-    write(client_fd, "The product has not been added/updated/deleted due to invalid details!\n", sizeof("The product has not been added due to invalid details!\n"));
+    write(client_fd, "The product has not been added/updated/deleted due to invalid details!\n", 72);
     // add invalid details to add to cart response.
 }
 
@@ -405,7 +405,7 @@ int totalCalc(int CustomerID, int client_fd)
     int cart_fd = open("Cart", O_RDWR | O_CREAT, 0744);
     lseek(cart_fd, 0, SEEK_SET);
 
-    int rcpt_fd = open("Receipt", O_RDWR | O_CREAT, 0744);
+    int rcpt_fd = open("Receipt", O_CREAT, 0744);
     lseek(rcpt_fd, 0, SEEK_SET);
 
     struct flock read_lock, write_lock;
@@ -515,7 +515,6 @@ void Payment(int CustomerID, int client_fd, int payment_flg)
     fcntl(pdts_fd, F_SETLKW, &write_lock);
 
     struct Product data;
-    struct Receipt rcpt;
 
     if (payment_flg == 1)
     {
@@ -525,6 +524,9 @@ void Payment(int CustomerID, int client_fd, int payment_flg)
         while (read(rcpt_fd, &temp, sizeof(struct Receipt)))
         {
             strcpy(temp.payment_status, "Payment Confirmed");
+            lseek(rcpt_fd, -sizeof(struct Receipt), SEEK_CUR);
+            write(rcpt_fd, &temp, sizeof(struct Receipt));
+
             lseek(pdts_fd, 0, SEEK_SET);
 
             while (read(pdts_fd, &data, sizeof(struct Product)))
@@ -541,6 +543,7 @@ void Payment(int CustomerID, int client_fd, int payment_flg)
     }
 
     // following code prints the receipt after payment.
+    lseek(rcpt_fd, 0, SEEK_SET);
     struct Receipt temp;
     while (read(rcpt_fd, &temp, sizeof(struct Receipt)))
     {

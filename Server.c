@@ -22,9 +22,10 @@ void createProductFile()
     close(fd);
 }
 
-void addProduct(int PID, char pname[50], int quantity, int price, int client_fd)
+void addProduct(int PID, char pname[50], int quantity, int price, int client_fd, int admin_fd)
 {
     int fd = open("Products", O_RDWR, 0744);
+    char response[100];
 
     struct flock write_lock;
 
@@ -46,6 +47,8 @@ void addProduct(int PID, char pname[50], int quantity, int price, int client_fd)
             if (temp.prod_id == PID)
             {
                 write(client_fd, "Addition of product failed due to duplicate PID!\n", sizeof("Addition of product failed due to duplicate PID!\n"));
+                sprintf(response, "Adding product with product id %d failed as product id is duplicate\n", temp.prod_id);
+                write(admin_fd, response, strlen(response));
                 return;
             }
         }
@@ -58,12 +61,15 @@ void addProduct(int PID, char pname[50], int quantity, int price, int client_fd)
         if (flg > 0)
         {
             write(client_fd, "The product has been added!\n", 29);
+            sprintf(response, "New product with product id %d added successfully\n", p1.prod_id);
+            write(admin_fd, response, strlen(response));
         }
         else
         {
             write(client_fd, "Addition of product failed!\n", 29);
+            sprintf(response, "Addition of product with product id %d failed\n", p1.prod_id);
+            write(admin_fd, response, strlen(response));
         }
-
         p1.price = -1;
         p1.prod_id = -1;
         p1.qty = -1;
@@ -75,14 +81,15 @@ void addProduct(int PID, char pname[50], int quantity, int price, int client_fd)
     close(fd);
 }
 
-void delProduct(int PID, int client_fd)
+void delProduct(int PID, int client_fd, int admin_fd)
 {
     int fd = open("Products", O_RDWR | O_CREAT, 0744);
     lseek(fd, 0, SEEK_SET);
     int temp = open("temp", O_RDWR | O_CREAT, 0744);
     lseek(temp, 0, SEEK_SET);
-    struct flock write_lock;
+    char response[100];
 
+    struct flock write_lock;
     write_lock.l_type = F_WRLCK;
     write_lock.l_whence = SEEK_SET;
     write_lock.l_start = 0;
@@ -109,11 +116,15 @@ void delProduct(int PID, int client_fd)
     rename("temp", "Products");
     if (delete_flg == 1)
     {
-        write(client_fd, "The product has been deleted!\n", 29);
+        write(client_fd, "The product has been deleted!\n", 31);
+        sprintf(response, "Product with product id %d deleted succesfully\n", PID);
+        write(admin_fd, response, strlen(response));
     }
     else
     {
         write(client_fd, "The product doesn't exist in store!\n", sizeof("The product doesn't exist in store!\n"));
+        sprintf(response, "Deleting product with product id %d failed as product does not exist\n", PID);
+        write(admin_fd, response, strlen(response));
     }
 
     write_lock.l_type = F_UNLCK;
@@ -124,13 +135,14 @@ void delProduct(int PID, int client_fd)
     close(temp);
 }
 
-void updateProduct(int PID, int quantity, int price, int client_fd)
+void updateProduct(int PID, int quantity, int price, int client_fd, int admin_fd)
 {
     int fd = open("Products", O_RDWR | O_CREAT, 0744);
     lseek(fd, 0, SEEK_SET);
     struct Product item;
-    struct flock write_lock;
+    char response[100];
 
+    struct flock write_lock;
     write_lock.l_type = F_WRLCK;
     write_lock.l_whence = SEEK_SET;
     write_lock.l_start = 0;
@@ -138,13 +150,15 @@ void updateProduct(int PID, int quantity, int price, int client_fd)
 
     fcntl(fd, F_SETLKW, &write_lock);
 
-    int update_flg = 0;
+    int update_flg = 0, old_qty = 0, old_price = 0;
 
     while (read(fd, &item, sizeof(struct Product)))
     {
         if (item.prod_id == PID)
         {
             update_flg = 1;
+            old_qty = item.qty;
+            old_price = item.price;
             item.qty = quantity;
             item.price = price;
             lseek(fd, -sizeof(struct Product), SEEK_CUR);
@@ -155,11 +169,15 @@ void updateProduct(int PID, int quantity, int price, int client_fd)
     }
     if (update_flg == 1)
     {
-        write(client_fd, "The product has been updated!\n", 29);
+        write(client_fd, "The product has been updated!\n", 31);
+        sprintf(response, "Price and Quantity of product with product id %d modified from %d to %d and %d to %d respectively.\n", PID, old_price, price, old_qty, quantity);
+        write(admin_fd, response, strlen(response));
     }
     else
     {
         write(client_fd, "The product doesn't exist in store!\n", sizeof("The product doesn't exist in store!\n"));
+        sprintf(response, "Updating product with product id %d failed as product does not exist\n", PID);
+        write(admin_fd, response, strlen(response));
     }
 
     write_lock.l_type = F_UNLCK;
@@ -200,6 +218,36 @@ void displayProduct(int client_fd)
     struct Product p;
     p.prod_id = -1;
     write(client_fd, &p, sizeof(struct Product));
+    read_lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &read_lock);
+    close(fd);
+}
+
+void generateAdminReceipt(int admin_fd)
+{
+    int fd = open("Products", O_RDWR | O_CREAT, 0744);
+
+    struct flock read_lock;
+    read_lock.l_type = F_RDLCK;
+    read_lock.l_whence = SEEK_SET;
+    read_lock.l_start = 0;
+    read_lock.l_len = 0;
+    fcntl(fd, F_SETLKW, &read_lock);
+
+    write(admin_fd, "Current Inventory:\n", strlen("Current Inventory:\n"));
+    write(admin_fd, "ProductID\tProductName\tQuantity\tPrice\n", strlen("ProductID\tProductName\tQuantity\tPrice\n"));
+
+    lseek(fd, 0, SEEK_SET);
+    struct Product p;
+    while (read(fd, &p, sizeof(struct Product)))
+    {
+        if (p.prod_id != -1)
+        {
+            char temp[100];
+            sprintf(temp, "%d\t%s\t%d\t%d\n", p.prod_id, p.prod_name, p.qty, p.price);
+            write(admin_fd, temp, strlen(temp));
+        }
+    }
     read_lock.l_type = F_UNLCK;
     fcntl(fd, F_SETLK, &read_lock);
     close(fd);
@@ -405,7 +453,7 @@ int totalCalc(int CustomerID, int client_fd)
     int cart_fd = open("Cart", O_RDWR | O_CREAT, 0744);
     lseek(cart_fd, 0, SEEK_SET);
 
-    int rcpt_fd = open("Receipt", O_CREAT, 0744);
+    int rcpt_fd = open("Receipt", O_RDWR | O_CREAT, 0744);
     lseek(rcpt_fd, 0, SEEK_SET);
 
     struct flock read_lock, write_lock;
@@ -566,6 +614,9 @@ int main()
     int new_fd, sockfd;
     printf("Setting up the server!\n");
 
+    int admin_fd = open("AdminLog", O_RDWR | O_CREAT, 0744);
+    lseek(admin_fd, 0, SEEK_END);
+
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
@@ -634,13 +685,13 @@ int main()
                             // printf("Hello\n");
                             read(new_fd, &price, sizeof(int));
                             // printf("hdashdbs");
-                            addProduct(prod_id, prod_name, qty, price, new_fd);
+                            addProduct(prod_id, prod_name, qty, price, new_fd, admin_fd);
                         }
                         else if (choice == 2)
                         {
                             int prod_id;
                             read(new_fd, &prod_id, sizeof(int));
-                            delProduct(prod_id, new_fd);
+                            delProduct(prod_id, new_fd, admin_fd);
                         }
                         else if (choice == 3)
                         {
@@ -648,7 +699,7 @@ int main()
                             read(new_fd, &prod_id, sizeof(int));
                             read(new_fd, &qty, sizeof(int));
                             read(new_fd, &price, sizeof(int));
-                            updateProduct(prod_id, qty, price, new_fd);
+                            updateProduct(prod_id, qty, price, new_fd, admin_fd);
                         }
                         else if (choice == 4)
                         {
@@ -656,6 +707,7 @@ int main()
                         }
                         else if (choice == 5)
                         {
+                            generateAdminReceipt(admin_fd);
                             break;
                         }
                         else

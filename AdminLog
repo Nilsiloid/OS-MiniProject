@@ -6,3 +6,14 @@ ProductID	ProductName	Quantity	Price
 3	laptop	15	43999
 4	umbrella	73	299
 5	bottle	3	20
+Price and Quantity of product with product id 1 modified from 399 to 399 and 10 to 24 respectively.
+Price and Quantity of product with product id 2 modified from 10 to 12 and 98 to 143 respectively.
+New product with product id 6 added successfully
+Product with product id 5 deleted succesfully
+Current Inventory:
+ProductID	ProductName	Quantity	Price
+1	water_bottle	24	399
+2	ball_pen	143	12
+3	laptop	15	43999
+4	umbrella	73	299
+6	Guitar	57	18999

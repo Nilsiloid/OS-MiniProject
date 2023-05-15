@@ -101,7 +101,7 @@ void delProduct(int PID, int client_fd)
     }
     else
     {
-        write(client_fd, "The product doesn't exist in cart!\n", sizeof("The product doesn't exist in cart!\n"));
+        write(client_fd, "The product doesn't exist in store!\n", sizeof("The product doesn't exist in store!\n"));
     }
     close(fd);
     close(temp);
@@ -144,7 +144,7 @@ void updateProduct(int PID, int quantity, int price, int client_fd)
     }
     else
     {
-        write(client_fd, "The product doesn't exist in cart!\n", sizeof("The product doesn't exist in cart!\n"));
+        write(client_fd, "The product doesn't exist in store!\n", sizeof("The product doesn't exist in store!\n"));
     }
 }
 
@@ -345,11 +345,11 @@ int totalCalc(int CustomerID, int client_fd)
                     {
                         if (cart.cart_items[i].prod_id == data.prod_id && cart.cart_items[i].qty <= data.qty)
                         {
-                            total += cart.cart_items[i].price * cart.cart_items[i].qty;
+                            total += data.price * cart.cart_items[i].qty;
                             rcpt.prod_id = cart.cart_items[i].prod_id;
-                            rcpt.price = cart.cart_items[i].price;
+                            rcpt.price = data.price;
                             rcpt.qty = cart.cart_items[i].qty;
-                            rcpt.cost = cart.cart_items[i].price * cart.cart_items[i].qty;
+                            rcpt.cost = data.price * cart.cart_items[i].qty;
                             strcpy(rcpt.prod_name, cart.cart_items[i].prod_name);
                             strcpy(rcpt.msg, "Quantity is same as required.");
                             strcpy(rcpt.payment_status, "Awaiting Payment.");
@@ -358,11 +358,11 @@ int totalCalc(int CustomerID, int client_fd)
                         }
                         else if (cart.cart_items[i].prod_id == data.prod_id && cart.cart_items[i].qty <= data.qty)
                         {
-                            total += cart.cart_items[i].price * data.qty;
+                            total += data.price * data.qty;
                             rcpt.prod_id = cart.cart_items[i].prod_id;
-                            rcpt.price = cart.cart_items[i].price;
+                            rcpt.price = data.price;
                             rcpt.qty = data.qty;
-                            rcpt.cost = cart.cart_items[i].price * data.qty;
+                            rcpt.cost = data.price * data.qty;
                             strcpy(rcpt.prod_name, cart.cart_items[i].prod_name);
                             strcpy(rcpt.msg, "Quantity is added as available. Total has been changed accordingly");
                             strcpy(rcpt.payment_status, "Awaiting Payment.");
@@ -440,6 +440,8 @@ int main()
 {
     createProductFile();
     int new_fd, sockfd;
+    printf("Setting up the server!\n");
+
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
@@ -469,6 +471,7 @@ int main()
         perror("Error: ");
         return -1;
     }
+    printf("Server set up successfully!\n");
 
     while (1)
     {

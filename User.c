@@ -461,6 +461,7 @@ int main()
                             }
                         }
                         read(sockfd, &total_amt, sizeof(int));
+                        printf("Any items missing are due to either unavailability or due to discontinuation of the product!\n\n");
                         printf("This is your total amount due: %d\n", total_amt);
                         printf("\n");
                     }

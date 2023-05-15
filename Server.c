@@ -25,6 +25,15 @@ void createProductFile()
 void addProduct(int PID, char pname[50], int quantity, int price, int client_fd)
 {
     int fd = open("Products", O_RDWR, 0744);
+
+    struct flock write_lock;
+
+    write_lock.l_type = F_WRLCK;
+    write_lock.l_whence = SEEK_SET;
+    write_lock.l_start = 0;
+    write_lock.l_len = 0;
+
+    fcntl(fd, F_SETLKW, &write_lock);
     // printf("%d\n", fd);
     // printf("Inside\n");
 
@@ -61,6 +70,8 @@ void addProduct(int PID, char pname[50], int quantity, int price, int client_fd)
         strcpy(p1.prod_name, "-1");
         write(fd, &p1, sizeof(struct Product));
     }
+    write_lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &write_lock);
     close(fd);
 }
 
@@ -68,6 +79,8 @@ void delProduct(int PID, int client_fd)
 {
     int fd = open("Products", O_RDWR | O_CREAT, 0744);
     lseek(fd, 0, SEEK_SET);
+    int temp = open("temp", O_RDWR | O_CREAT, 0744);
+    lseek(temp, 0, SEEK_SET);
     struct flock write_lock;
 
     write_lock.l_type = F_WRLCK;
@@ -76,12 +89,11 @@ void delProduct(int PID, int client_fd)
     write_lock.l_len = 0;
 
     fcntl(fd, F_SETLKW, &write_lock);
-    write_lock.l_type = F_UNLCK;
-    fcntl(fd, F_SETLK, &write_lock);
+    fcntl(temp, F_SETLKW, &write_lock);
 
-    int temp = open("temp", O_RDWR | O_CREAT, 0744);
     struct Product data;
     int delete_flg = 0;
+
     while (read(fd, &data, sizeof(struct Product)))
     {
         if (data.prod_id != PID)
@@ -103,6 +115,11 @@ void delProduct(int PID, int client_fd)
     {
         write(client_fd, "The product doesn't exist in store!\n", sizeof("The product doesn't exist in store!\n"));
     }
+
+    write_lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &write_lock);
+    fcntl(temp, F_SETLK, &write_lock);
+
     close(fd);
     close(temp);
 }
@@ -120,8 +137,6 @@ void updateProduct(int PID, int quantity, int price, int client_fd)
     write_lock.l_len = 0;
 
     fcntl(fd, F_SETLKW, &write_lock);
-    write_lock.l_type = F_UNLCK;
-    fcntl(fd, F_SETLK, &write_lock);
 
     int update_flg = 0;
 
@@ -146,11 +161,25 @@ void updateProduct(int PID, int quantity, int price, int client_fd)
     {
         write(client_fd, "The product doesn't exist in store!\n", sizeof("The product doesn't exist in store!\n"));
     }
+
+    write_lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &write_lock);
+    close(fd);
 }
 
 void displayProduct(int client_fd)
 {
     int fd = open("Products", O_RDWR | O_CREAT, 0744);
+
+    struct flock read_lock;
+
+    read_lock.l_type = F_RDLCK;
+    read_lock.l_whence = SEEK_SET;
+    read_lock.l_start = 0;
+    read_lock.l_len = 0;
+
+    fcntl(fd, F_SETLKW, &read_lock);
+
     lseek(fd, 0, SEEK_SET);
     struct Product item;
 
@@ -171,12 +200,24 @@ void displayProduct(int client_fd)
     struct Product p;
     p.prod_id = -1;
     write(client_fd, &p, sizeof(struct Product));
+    read_lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &read_lock);
     close(fd);
 }
 
 int createCart()
 {
     int cart_fd = open("Cart", O_RDWR | O_CREAT, 0744);
+
+    struct flock write_lock;
+
+    write_lock.l_type = F_WRLCK;
+    write_lock.l_whence = SEEK_SET;
+    write_lock.l_start = 0;
+    write_lock.l_len = 0;
+
+    fcntl(cart_fd, F_SETLKW, &write_lock);
+
     lseek(cart_fd, (-1) * sizeof(struct Customer), SEEK_END);
 
     struct Customer cust;
@@ -193,6 +234,8 @@ int createCart()
         // printf("%d\n", cust.cart_items[i].prod_id);
     }
     write(cart_fd, &cust, sizeof(struct Customer));
+    write_lock.l_type = F_UNLCK;
+    fcntl(cart_fd, F_SETLK, &write_lock);
     close(cart_fd);
     return cust.cust_id;
 }
@@ -207,6 +250,20 @@ void EditCart(int customerID, int productID, int qty, int update, int delete, in
 
     int cart_fd = open("Cart", O_RDWR | O_CREAT, 0744);
     lseek(cart_fd, 0, SEEK_SET);
+
+    struct flock read_lock, write_lock;
+
+    read_lock.l_type = F_RDLCK;
+    read_lock.l_whence = SEEK_SET;
+    read_lock.l_start = 0;
+    read_lock.l_len = 0;
+    fcntl(pdts_fd, F_SETLKW, &read_lock);
+
+    write_lock.l_type = F_WRLCK;
+    write_lock.l_whence = SEEK_SET;
+    write_lock.l_start = 0;
+    write_lock.l_len = 0;
+    fcntl(cart_fd, F_SETLKW, &write_lock);
 
     struct Product data;
     struct Customer cust;
@@ -247,6 +304,12 @@ void EditCart(int customerID, int productID, int qty, int update, int delete, in
                     }
                     lseek(cart_fd, -sizeof(struct Customer), SEEK_CUR);
                     write(cart_fd, &cust, sizeof(struct Customer));
+
+                    read_lock.l_type = F_UNLCK;
+                    write_lock.l_type = F_UNLCK;
+                    fcntl(pdts_fd, F_SETLK, &read_lock);
+                    fcntl(cart_fd, F_SETLK, &write_lock);
+
                     close(cart_fd);
                     close(pdts_fd);
                     return;
@@ -268,6 +331,15 @@ void emptyCart(int customerID)
     int cart_fd = open("Cart", O_RDWR | O_CREAT, 0744);
     lseek(cart_fd, 0, SEEK_SET);
 
+    struct flock write_lock;
+
+    write_lock.l_type = F_WRLCK;
+    write_lock.l_whence = SEEK_SET;
+    write_lock.l_start = 0;
+    write_lock.l_len = 0;
+
+    fcntl(cart_fd, F_SETLKW, &write_lock);
+
     struct Customer cart;
     while (read(cart_fd, &cart, sizeof(struct Customer)))
     {
@@ -283,6 +355,8 @@ void emptyCart(int customerID)
         close(cart_fd);
         return;
     }
+    write_lock.l_type = F_UNLCK;
+    fcntl(cart_fd, F_SETLK, &write_lock);
     close(cart_fd);
 }
 
@@ -290,6 +364,14 @@ void displayCart(int CustomerID, int client_fd)
 {
     int fd = open("Cart", O_RDWR | O_CREAT, 0744);
     lseek(fd, 0, SEEK_SET);
+
+    struct flock read_lock;
+    read_lock.l_type = F_RDLCK;
+    read_lock.l_whence = SEEK_SET;
+    read_lock.l_start = 0;
+    read_lock.l_len = 0;
+    fcntl(fd, F_SETLKW, &read_lock);
+
     struct Customer cart;
 
     while (read(fd, &cart, sizeof(struct Customer)))
@@ -310,6 +392,8 @@ void displayCart(int CustomerID, int client_fd)
             }
         }
     }
+    read_lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &read_lock);
     close(fd);
 }
 
@@ -323,6 +407,20 @@ int totalCalc(int CustomerID, int client_fd)
 
     int rcpt_fd = open("Receipt", O_RDWR | O_CREAT, 0744);
     lseek(rcpt_fd, 0, SEEK_SET);
+
+    struct flock read_lock, write_lock;
+    read_lock.l_type = F_RDLCK;
+    read_lock.l_whence = SEEK_SET;
+    read_lock.l_start = 0;
+    read_lock.l_len = 0;
+    fcntl(pdts_fd, F_SETLKW, &read_lock);
+    fcntl(cart_fd, F_SETLKW, &read_lock);
+
+    write_lock.l_type = F_WRLCK;
+    write_lock.l_whence = SEEK_SET;
+    write_lock.l_start = 0;
+    write_lock.l_len = 0;
+    fcntl(rcpt_fd, F_SETLKW, &write_lock);
 
     struct Product data;
     struct Customer cart;
@@ -385,6 +483,13 @@ int totalCalc(int CustomerID, int client_fd)
     temp.prod_id = -1;
     write(client_fd, &temp, sizeof(struct Receipt));
 
+    read_lock.l_type = F_UNLCK;
+    fcntl(pdts_fd, F_SETLK, &read_lock);
+    fcntl(cart_fd, F_SETLK, &read_lock);
+
+    write_lock.l_type = F_UNLCK;
+    fcntl(rcpt_fd, F_SETLK, &write_lock);
+
     close(pdts_fd);
     close(cart_fd);
     close(rcpt_fd);
@@ -399,6 +504,15 @@ void Payment(int CustomerID, int client_fd, int payment_flg)
 
     int rcpt_fd = open("Receipt", O_RDWR, 0744);
     lseek(rcpt_fd, 0, SEEK_SET);
+
+    struct flock write_lock;
+
+    write_lock.l_type = F_WRLCK;
+    write_lock.l_whence = SEEK_SET;
+    write_lock.l_start = 0;
+    write_lock.l_len = 0;
+    fcntl(rcpt_fd, F_SETLKW, &write_lock);
+    fcntl(pdts_fd, F_SETLKW, &write_lock);
 
     struct Product data;
     struct Receipt rcpt;
@@ -434,6 +548,13 @@ void Payment(int CustomerID, int client_fd, int payment_flg)
     }
     temp.prod_id = -1;
     write(client_fd, &temp, sizeof(struct Receipt));
+
+    write_lock.l_type = F_UNLCK;
+    fcntl(rcpt_fd, F_SETLK, &write_lock);
+    fcntl(pdts_fd, F_SETLK, &write_lock);
+
+    close(pdts_fd);
+    close(rcpt_fd);
 }
 
 int main()
